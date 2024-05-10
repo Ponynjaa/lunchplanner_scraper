@@ -4,14 +4,19 @@
   "description": "",
   "main": "lieferando_scraper.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node lieferando_scraper.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
     "node-html-parser": "^6.1.13",
-    "takeaway": "^0.4.6"
+    "pg": "^8.11.5",
+    "takeaway": "^0.4.6",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.6"
   },
   "type": "module"
 }
