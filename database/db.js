@@ -15,10 +15,6 @@ const pool = new Pool({
 });
 
 export default function connectToDatabase() {
-	pool.on('connect', () => {
-		console.log('Connected to the database');
-	});
-
 	pool.on('error', (err) => {
 		console.error('Error connecting to the database:');
 		throw err;
