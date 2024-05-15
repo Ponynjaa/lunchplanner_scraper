@@ -15,6 +15,28 @@ async function main () {
 	});
 	const pool = db();
 
+	// const result = await pool.query(`
+	// 	WITH subkitchens_agg AS (
+	// 		SELECT r.id AS restaurant_id, k.description_de AS kitchen_description, json_agg(sk.description_de) AS subkitchens_array
+	// 		FROM lunchplanner.restaurants r
+	// 		JOIN lunchplanner.restaurants_subkitchens rs ON r.id = rs.restaurant_id
+	// 		JOIN lunchplanner.subkitchens sk ON sk.id = rs.subkitchen_id
+	// 		JOIN lunchplanner.kitchens k ON k.id = sk.kitchen_id
+	// 		GROUP BY r.id, k.description_de
+	// 	)
+	// 	SELECT r.id AS id, r.name AS name, r.logourl AS logourl, r.city AS city, r.street AS street,
+	// 		json_object_agg(
+	// 			s.kitchen_description,
+	// 			s.subkitchens_array
+	// 		) AS kitchens
+	// 	FROM lunchplanner.restaurants r
+	// 	JOIN subkitchens_agg s ON r.id = s.restaurant_id
+	// 	GROUP BY r.id, r.name, r.logourl, r.city, r.street;
+	// `);
+	// console.log(result.rows);
+
+	// return await pool.end();
+
 	await pool.query(`CREATE SCHEMA IF NOT EXISTS lunchplanner;`);
 
 	// await pool.query(`DROP TABLE lunchplanner.restaurants_subkitchens`);
@@ -22,7 +44,7 @@ async function main () {
 
 	await pool.query(`CREATE TABLE IF NOT EXISTS lunchplanner.restaurants (
 		id text PRIMARY KEY,
-		name text UNIQUE NOT NULL,
+		name text NOT NULL,
 		logourl text,
 		city text NOT NULL,
 		street text NOT NULL
@@ -47,16 +69,6 @@ async function main () {
 		subkitchen_id int REFERENCES lunchplanner.subkitchens(id),
 		CONSTRAINT PK_restaurants_subkitchens PRIMARY KEY (restaurant_id, subkitchen_id)
 	);`);
-
-	const result = await pool.query(`
-		SELECT r.id AS restaurant_id, r.name AS restaurant_name, ARRAY_AGG(k.description_de) AS kitchens
-		FROM lunchplanner.restaurants r
-		JOIN lunchplanner.restaurants_subkitchens rs ON r.id = rs.restaurant_id
-		JOIN lunchplanner.subkitchens k ON k.id = rs.subkitchen_id
-		WHERE r.id = 'RQ7O0RRN'
-		GROUP BY r.id, r.name;
-	`);
-	console.log(result.rows[0]);
 
 	const config = new TakeawayConfig({
 		language: 'de',
@@ -105,7 +117,7 @@ async function main () {
 		try {
 			await pool.query(`
 				INSERT INTO lunchplanner.restaurants (id, name, logourl, city, street) VALUES ($1, $2, $3, $4, $5)
-				ON CONFLICT (name) DO
+				ON CONFLICT (id) DO
 				UPDATE SET id=$1, name=$2, logourl=$3, city=$4, street=$5;
 			`, [
 				restaurant.id, restaurant.name, restaurant.logoUrl, restaurant.address.city, restaurant.address.street
